@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>8FACC7B5-D10C-4BF4-9FC1-57916E0F5F6C</string>
+	<key>IDESourceControlProjectName</key>
+	<string>Tv2 Articles</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>5D14FD5B6CF72D24EAE5C88090C664AB32E5061B</key>
+		<string>https://github.com/araujoraphael/articles.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>Tv2 Articles.xcodeproj</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>5D14FD5B6CF72D24EAE5C88090C664AB32E5061B</key>
+		<string>../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/araujoraphael/articles.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>5D14FD5B6CF72D24EAE5C88090C664AB32E5061B</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>5D14FD5B6CF72D24EAE5C88090C664AB32E5061B</string>
+			<key>IDESourceControlWCCName</key>
+			<string>Tv2%20Articles</string>
+		</dict>
+	</array>
+</dict>
+</plist>

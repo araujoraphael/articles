@@ -9,17 +9,8 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
+@interface DataController : NSObject
++ (void)requestArticles:(void (^)(NSArray *))successBlock
+                failure:(void (^)(void))failure;
 
-@protocol DataCrontrollerDelegate ;
-
-@interface DataController : NSObject {
-    id <DataCrontrollerDelegate> delegate;
-}
-
-@property (nonatomic, retain) id <DataCrontrollerDelegate> delegate;
-- (NSArray *) requestArticles;
-@end
-
-@protocol DataCrontrollerDelegate
-- (void)didFinishRequestArticles:(NSArray *)articles;
 @end

@@ -16,7 +16,10 @@
              @"title" : @"title",
              @"identifier" : @"identifier",
              @"smallTeaserImage" : @"small_teaser_image",
-             @"url" : @"url"
+             @"url" : @"url",
+             @"hasVideo" : @"has_video",
+             @"isLive" : @"is_live",
+             @"isBreaking" : @"is_breaking"
              };
 }
 

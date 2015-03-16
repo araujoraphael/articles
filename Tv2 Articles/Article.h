@@ -15,6 +15,9 @@
 @property (nonatomic) NSString *identifier;
 @property (nonatomic) NSURL *smallTeaserImage;
 @property (nonatomic) NSURL *url;
+@property (nonatomic) BOOL isLive;
+@property (nonatomic) BOOL isBreaking;
+@property (nonatomic) BOOL hasVideo;
 
 + (NSArray *)deserializeArticlesFromJSON:(NSArray *)articlesJSON;
 @end

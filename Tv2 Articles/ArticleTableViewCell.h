@@ -9,6 +9,10 @@
 #import <UIKit/UIKit.h>
 
 @interface ArticleTableViewCell : UITableViewCell
-@property (nonatomic, weak) IBOutlet UILabel *titleLabelView;
-@property (nonatomic, weak) IBOutlet UIImageView *articleImageView;
+@property (nonatomic, strong) IBOutlet UILabel *titleLabel;
+@property (nonatomic, strong) IBOutlet UIImageView *articleImageView;
+@property (nonatomic, strong) IBOutlet UIView *articleImageContainerView;
+@property (nonatomic, strong) UIImageView *hasVideoImageView;
+@property (nonatomic, strong) IBOutlet UIImageView *isLiveImageView;
+@property (nonatomic, strong) IBOutlet UIImageView *isBreakingImageView;
 @end

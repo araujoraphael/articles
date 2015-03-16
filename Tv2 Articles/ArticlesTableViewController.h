@@ -7,9 +7,13 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "DataController.h"
 
-@interface ArticlesTableViewController : UITableViewController<DataCrontrollerDelegate>
+@interface ArticlesTableViewController : UITableViewController
+- (void)refreshTableView:(UIRefreshControl *)refreshControl;
+//@property (nonatomic, strong) IBOutlet UIView *loadingArticlesView;
+//@property (nonatomic, strong) IBOutlet UIActivityIndicatorView *loadingArticlesActivityIndicator;
+//@property (nonatomic, strong) IBOutlet UILabel *alertLabel;
+
 
 @end
 

@@ -8,7 +8,9 @@
 
 #import "ArticlesTableViewController.h"
 #import "ArticleTableViewCell.h"
+#import "ArticleViewController.h"
 #import "Article.h"
+#import "DataController.h"
 
 @interface ArticlesTableViewController ()
 @property (nonatomic, strong) NSOperationQueue *imageDownloadingQueue;
@@ -17,33 +19,53 @@
 
 @implementation ArticlesTableViewController
 
-DataController *dataController;
 NSArray *fetchedArticles;
+NSInteger selectedRow;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+
+    self.tableView.backgroundColor = [UIColor colorWithRed:220.0 green:220.0 blue:220.0 alpha:1.0];
     
-    dataController = [[DataController alloc] init];
-    dataController.delegate = self;
-    
-    [dataController requestArticles];
-    
-    NSLog(@"viewDidLoad - ArticlesTableViewController");
+    [self addRefreshController];
+    [self loadArticles];
     
     self.imageDownloadingQueue = [[NSOperationQueue alloc] init];
-    self.imageDownloadingQueue.maxConcurrentOperationCount = 4; // many servers limit how many concurrent requests they'll accept from a device, so make sure to set this accordingly
-    
+    self.imageDownloadingQueue.maxConcurrentOperationCount = 4; // just in case of server limit the number of concurrent requests
     self.imageCache = [[NSCache alloc] init];
-    // Uncomment the following line to preserve selection between presentations.
-    // self.clearsSelectionOnViewWillAppear = NO;
-    
-    // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-    // self.navigationItem.rightBarButtonItem = self.editButtonItem;
 }
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+- (void) addRefreshController {
+    UIRefreshControl *refreshControl = [[UIRefreshControl alloc] init];
+    refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:@"Please wait..."];
+    refreshControl.tintColor = [UIColor redColor];
+    [refreshControl addTarget:self action:@selector(refreshTableView:) forControlEvents:UIControlEventValueChanged];
+    [self.tableView addSubview:refreshControl];
+}
+
+-(void)loadArticles {
+    [DataController requestArticles:^(NSArray *articles) {
+        fetchedArticles = articles;
+        [self.tableView reloadData];
+        [UIView beginAnimations:@"anime" context:nil];
+        [UIView setAnimationDelegate:self];
+        [UIView setAnimationDuration:1.0];
+        [UIView setAnimationCurve:UIViewAnimationCurveEaseIn];
+        [UIView setAnimationBeginsFromCurrentState:YES];
+        self.tableView.alpha = 1.0f;
+        [UIView commitAnimations];
+    }failure:^{}
+    ];
+}
+
+- (void)refreshTableView:(UIRefreshControl *)refreshControl {
+    [self loadArticles];
+    [refreshControl endRefreshing];
 }
 
 #pragma mark - Table view data source
@@ -60,6 +82,15 @@ NSArray *fetchedArticles;
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [self.tableView deselectRowAtIndexPath:indexPath animated:YES];
+    
+    UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+
+    ArticleViewController *articleViewController = [storyboard instantiateViewControllerWithIdentifier:@"ArticleViewController"];
+    Article *article = [fetchedArticles objectAtIndex:indexPath.row];
+    articleViewController.articleURL = article.url;
+    articleViewController.articleTitle = article.title;
+
+    [self.navigationController pushViewController: articleViewController animated:YES];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -71,23 +102,24 @@ NSArray *fetchedArticles;
     Article *article = [fetchedArticles objectAtIndex:indexPath.row];
     if(!cell)
     {
-        NSArray *nibs = [[NSBundle mainBundle] loadNibNamed:@"ArticleTableViewCell" owner:self options:nil];
-        cell = (ArticleTableViewCell *)[nibs objectAtIndex:0];
-        cell.imageView.frame = CGRectMake(0,5,124,70);
+        cell = [[ArticleTableViewCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
     }
     
-    cell.titleLabelView.text = article.title;
-    /**** loading image with cache ******/
+    cell.titleLabel.text = article.title;
+    UIImageView *hasVideoImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"hasVideo.png"]];
+    hasVideoImageView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.3f];
+    
+    cell.hasVideoImageView.hidden = !article.hasVideo;
+    cell.isLiveImageView.hidden = !article.isLive;
+    cell.isBreakingImageView.hidden = !article.isBreaking;
+    
     NSString *imageUrlString = [article.smallTeaserImage absoluteString];
     UIImage *cachedImage = [self.imageCache objectForKey:imageUrlString];
     if (cachedImage) {
-        cell.imageView.image = cachedImage;
+        cell.articleImageView.image = cachedImage;
     } else {
-        // you'll want to initialize the image with some blank image as a placeholder
         
-        cell.imageView.image = [UIImage imageNamed:@"kitty.jpg"];
-        
-        // now download in the image in the background
+        cell.articleImageView.image = [UIImage imageNamed:@"kitty.jpg"];
         
         [self.imageDownloadingQueue addOperationWithBlock:^{
             
@@ -98,90 +130,23 @@ NSArray *fetchedArticles;
                 image = [UIImage imageWithData:imageData];
             
             if (image) {
-                // add the image to your cache
                 
                 [self.imageCache setObject:image forKey:imageUrlString];
                 
-                // finally, update the user interface in the main queue
-                
                 [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-                    // Make sure the cell is still visible
-                    
-                    // Note, by using the same `indexPath`, this makes a fundamental
-                    // assumption that you did not insert any rows in the intervening
-                    // time. If this is not a valid assumption, make sure you go back
-                    // to your model to identify the correct `indexPath`/`updateCell`
-                    
-                    UITableViewCell *updateCell = [tableView cellForRowAtIndexPath:indexPath];
+                    ArticleTableViewCell *updateCell = (ArticleTableViewCell *)[tableView cellForRowAtIndexPath:indexPath];
                     if (updateCell)
-                        updateCell.imageView.image = image;
+                        updateCell.articleImageView.image = image;
                 }];
             }
         }];
     }
-    /**** END ******/
     return cell;
 }
 
 
-/*
-// Override to support conditional editing of the table view.
-- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
-    // Return NO if you do not want the specified item to be editable.
-    return YES;
-}
-*/
-
-/*
-// Override to support editing the table view.
-- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
-    if (editingStyle == UITableViewCellEditingStyleDelete) {
-        // Delete the row from the data source
-        [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
-    } else if (editingStyle == UITableViewCellEditingStyleInsert) {
-        // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-    }   
-}
-*/
-
-/*
-// Override to support rearranging the table view.
-- (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath {
-}
-*/
-
-/*
-// Override to support conditional rearranging of the table view.
-- (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath {
-    // Return NO if you do not want the item to be re-orderable.
-    return YES;
-}
-*/
-
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    return 80;
+    return 70;
 }
-
-/*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
-
-- (void)didFinishRequestArticles:(NSArray *)articles {
-    
-    fetchedArticles = articles;
-    Article *article =articles[0];
-    NSLog(@"Opa %@ - %@", article.title, article.url);
-    [self.tableView reloadData];
-    
-}
-
-
-
 @end
